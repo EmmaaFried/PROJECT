@@ -1,0 +1,30 @@
+Projekt ider:
+
+''' Första ideer:
+- vind data + adcp data för strömmar, kolla ekman transport (submesoscale mixing)
+    - jämför vind riktning och stömmriktnning
+    - jämför med satelit data
+    - kolla dag 2 data
+    - temp och salt för definera fronten
+    - ekman bouyance flux, temp + salt gradient behövs (assume the ocean gradient is fixed for multiple hours, and use wind data
+    from ERA5 as nonconstant - assume everything is constant except for the wind, and the changing wind data can be recived from era5)
+    - compare wind data from boat with era5 data to see how accurate it is
+'''
+
+
+Vidarearbetare ideer:
+
+    Part 1:
+    Calculate b_x and take the wind stress from the boat and calculate the bouyancy flux along day 1 and day 3 transect  (See sebs exercise)
+
+    Part 2: 
+    Calculate the bouyancy flux along the fronr transect from day 2
+
+    Part 3:
+    Compare satielite and boat wind stress/wind data
+
+    Part 4:
+    Calculate the bouyancy flux at the front over the full day, use the temp-salinity gradient as a constant and the wind satielite data as varying
+
+    Part 5:
+    Use ADCP data along day 1 and 3 and (maybe) and plot the current, and the how it correlates the the bouyancy?
