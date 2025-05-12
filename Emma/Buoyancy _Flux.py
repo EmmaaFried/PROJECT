@@ -32,7 +32,7 @@ df_combined['depth_m'] = -depth  # z är negativ i gsw
 lon = df_combined['Longitude']
 lat = df_combined['Latitude']
 
-variables = ['Temp_SBE45', 'Salinity_SBE45']
+variables = ['Temp_SBE45', 'Salinity_SBE45'] # TODO: Vilken temp ska användas?
 titles = ['Temperature (°C)', 'Salinity (psu)']
 cmaps = ['coolwarm', 'viridis']
 
@@ -71,12 +71,27 @@ plt.show()
 
 # Calculate boutancy gardient (b_x)
 
-#density = df_combined['']
+temp = df_combined['Temp_SBE45']
+salinity = df_combined['Salinity_SBE45']
 
 g = 9.81  
 
 depth_target = 10
 idx_depth = np.argmin(np.abs(depth - depth_target))
+
+# Steg 1: Omvandla praktisk salinitet (PSU) till absolut salinitet (SA)
+SA = gsw.SA_from_SP(df_combined['Salinity_SBE45'], p_dbar, df_combined['Longitude'], df_combined['Latitude'])
+
+# Steg 2: Omvandla temperatur till konservativ temperatur (CT)
+CT = gsw.CT_from_t(SA, df_combined['Temp_SBE45'], p_dbar)
+
+# Steg 3: Beräkna densitet (kg/m^3)
+rho = gsw.rho(SA, CT, p_dbar)
+
+# Lägg till densiteten till din DataFrame
+df_combined['density'] = rho
+
+density = df_combined['density']
 
 rho_10m = density[idx_depth, :]
 
@@ -87,3 +102,33 @@ buoyancy = -g * (rho_10m - rho_0) / rho_0
 dx = 1.5e3  
 
 db_dx = np.gradient(buoyancy, dx)
+
+# Plot b_x:
+fig, axs = plt.subplots(1, 2, figsize=(16, 12), subplot_kw={'projection': ccrs.Mercator()})
+axs = axs.flatten()
+
+for i, ax in enumerate(axs):
+    ax.set_extent(extent, crs=ccrs.PlateCarree())
+    ax.add_feature(cfeature.COASTLINE)
+    ax.add_feature(cfeature.LAND, facecolor='lightgray')
+    ax.add_feature(cfeature.BORDERS, linestyle='--', linewidth=0.5)
+
+    gl = ax.gridlines(draw_labels=True, linewidth=0.5, color='gray', linestyle='--')
+    gl.top_labels = gl.right_labels = False
+    if i % 2 != 0:
+        gl.left_labels = False
+    if i < 2:
+        gl.bottom_labels = False
+
+    # Plot variables as scatter
+    sc = ax.scatter(lon, lat, c=df_combined[variables[i]], cmap=cmaps[i],
+                    s=30, transform=ccrs.PlateCarree())
+
+    # Colormap
+    cbar = plt.colorbar(sc, ax=ax, orientation='vertical', fraction=0.046, pad=0.04)
+    cbar.set_label(titles[i])
+
+    ax.set_title(titles[i])
+
+plt.tight_layout()
+plt.show()
