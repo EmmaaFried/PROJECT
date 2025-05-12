@@ -69,6 +69,11 @@ plt.tight_layout()
 plt.show()
 '''
 
+
+
+'''------------------------------------------------------------------------------------------------------------------------------------'''
+
+
 # Calculate boutancy gardient (b_x)
 
 temp = df_combined['Temp_SBE45']
@@ -79,56 +84,66 @@ g = 9.81
 depth_target = 10
 idx_depth = np.argmin(np.abs(depth - depth_target))
 
-# Steg 1: Omvandla praktisk salinitet (PSU) till absolut salinitet (SA)
+# Omvandla praktisk salinitet (PSU) till absolut salinitet (SA)
 SA = gsw.SA_from_SP(df_combined['Salinity_SBE45'], p_dbar, df_combined['Longitude'], df_combined['Latitude'])
 
-# Steg 2: Omvandla temperatur till konservativ temperatur (CT)
+# Omvandla temperatur till konservativ temperatur (CT)
 CT = gsw.CT_from_t(SA, df_combined['Temp_SBE45'], p_dbar)
 
-# Steg 3: Beräkna densitet (kg/m^3)
 rho = gsw.rho(SA, CT, p_dbar)
 
-# Lägg till densiteten till din DataFrame
 df_combined['density'] = rho
 
-density = df_combined['density']
 
-rho_10m = density[idx_depth, :]
+# Calculate b_x:
 
-rho_0 = np.nanmean(rho_10m)
+rho = df_combined['density'].values
 
-buoyancy = -g * (rho_10m - rho_0) / rho_0
+rho_0 = np.nanmean(rho)
+g = 9.81
+buoyancy = -g * (rho - rho_0) / rho_0
 
-dx = 1.5e3  
+# 1. Geodetiskt avstånd mellan punkter (N-1)
+dx = gsw.distance(lon, lat)  # meter mellan punkter
 
-db_dx = np.gradient(buoyancy, dx)
+# 2. Kumulativ distans för varje punkt (N)
+x = np.insert(np.cumsum(dx), 0, 0)  # avstånd från start
+
+# 3. Gradient av buoyancy mht position
+b_x = np.gradient(buoyancy, x)
+
+df_combined['b_x'] = b_x
+
+# Rolling mean:
+df_combined['b_x_smooth'] = pd.Series(b_x).rolling(window=5, center=True, min_periods=1).mean()
+
+b_x_smooth = df_combined['b_x_smooth']
 
 # Plot b_x:
-fig, axs = plt.subplots(1, 2, figsize=(16, 12), subplot_kw={'projection': ccrs.Mercator()})
-axs = axs.flatten()
+'''
+fig, ax = plt.subplots(1, 1, figsize=(10, 10), subplot_kw={'projection': ccrs.Mercator()})
 
-for i, ax in enumerate(axs):
-    ax.set_extent(extent, crs=ccrs.PlateCarree())
-    ax.add_feature(cfeature.COASTLINE)
-    ax.add_feature(cfeature.LAND, facecolor='lightgray')
-    ax.add_feature(cfeature.BORDERS, linestyle='--', linewidth=0.5)
+extent = [lon.min() - 0.05, lon.max() + 0.05, lat.min() - 0.05, lat.max() + 0.05]
+ax.set_extent(extent, crs=ccrs.PlateCarree())
 
-    gl = ax.gridlines(draw_labels=True, linewidth=0.5, color='gray', linestyle='--')
-    gl.top_labels = gl.right_labels = False
-    if i % 2 != 0:
-        gl.left_labels = False
-    if i < 2:
-        gl.bottom_labels = False
+ax.add_feature(cfeature.COASTLINE)
+ax.add_feature(cfeature.LAND, facecolor='lightgray')
+ax.add_feature(cfeature.BORDERS, linestyle='--', linewidth=0.5)
 
-    # Plot variables as scatter
-    sc = ax.scatter(lon, lat, c=df_combined[variables[i]], cmap=cmaps[i],
-                    s=30, transform=ccrs.PlateCarree())
+gl = ax.gridlines(draw_labels=True, linewidth=0.5, color='gray', linestyle='--')
+gl.top_labels = gl.right_labels = False
+gl.left_labels = True
+gl.bottom_labels = True
 
-    # Colormap
-    cbar = plt.colorbar(sc, ax=ax, orientation='vertical', fraction=0.046, pad=0.04)
-    cbar.set_label(titles[i])
+vmin, vmax = -1e-7, 1e-7 
 
-    ax.set_title(titles[i])
+sc = ax.scatter(lon, lat, c=df_combined['b_x'], cmap='coolwarm', 
+                vmin=vmin, vmax=vmax, s=30, transform=ccrs.PlateCarree())
 
-plt.tight_layout()
+cbar = plt.colorbar(sc, ax=ax, orientation='vertical', fraction=0.046, pad=0.04)
+cbar.set_label('bₓ (s⁻²)')
+
+ax.set_title('Horisontell buoyancy-gradient bₓ')
+
 plt.show()
+'''
