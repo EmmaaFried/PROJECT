@@ -38,7 +38,7 @@ cmaps = ['coolwarm', 'viridis']
 
 # Area
 extent = [lon.min() - 0.05, lon.max() + 0.05, lat.min() - 0.05, lat.max() + 0.05]
-
+'''
 fig, axs = plt.subplots(1, 2, figsize=(16, 12), subplot_kw={'projection': ccrs.Mercator()})
 axs = axs.flatten()
 
@@ -67,4 +67,23 @@ for i, ax in enumerate(axs):
 
 plt.tight_layout()
 plt.show()
+'''
 
+# Calculate boutancy gardient (b_x)
+
+#density = df_combined['']
+
+g = 9.81  
+
+depth_target = 10
+idx_depth = np.argmin(np.abs(depth - depth_target))
+
+rho_10m = density[idx_depth, :]
+
+rho_0 = np.nanmean(rho_10m)
+
+buoyancy = -g * (rho_10m - rho_0) / rho_0
+
+dx = 1.5e3  
+
+db_dx = np.gradient(buoyancy, dx)
