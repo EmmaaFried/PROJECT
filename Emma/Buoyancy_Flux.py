@@ -38,7 +38,7 @@ rho0 = df_combined['density'] # sea water density
 
 cross_dot = tau_y * b_x - tau_x * b_x
 
-EBF = cross_dot / (rho0 * f)
+EBF = cross_dot.values / (rho0 * f)
 
 df_combined['EBF'] = EBF
 
