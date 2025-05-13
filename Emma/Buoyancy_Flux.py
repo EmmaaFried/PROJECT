@@ -44,7 +44,7 @@ df_combined['EBF'] = EBF
 
 
 # Plot:
-
+'''
 fig, ax = plt.subplots(1, 1, figsize=(10, 10), subplot_kw={'projection': ccrs.Mercator()})
 
 extent = [lon.min() - 0.05, lon.max() + 0.05, lat.min() - 0.05, lat.max() + 0.05]
@@ -70,3 +70,4 @@ cbar.set_label('???')
 ax.set_title('Ekman Buoyancy Flux')
 
 plt.show()
+'''

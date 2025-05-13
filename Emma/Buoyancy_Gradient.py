@@ -32,12 +32,14 @@ df_combined['depth_m'] = -depth  # z är negativ i gsw
 lon = df_combined['Longitude']
 lat = df_combined['Latitude']
 
-variables = ['Temp_SBE45', 'Salinity_SBE45'] # TODO: Vilken temp ska användas?
+variables = ['Temp_SBE45', 'Salinity_SBE45']
 titles = ['Temperature (°C)', 'Salinity (psu)']
 cmaps = ['coolwarm', 'viridis']
 
-# Area
 extent = [lon.min() - 0.05, lon.max() + 0.05, lat.min() - 0.05, lat.max() + 0.05]
+
+temp_range = [10, 12]  
+salinity_range = [22, 30]  
 '''
 fig, axs = plt.subplots(1, 2, figsize=(16, 12), subplot_kw={'projection': ccrs.Mercator()})
 axs = axs.flatten()
@@ -55,11 +57,13 @@ for i, ax in enumerate(axs):
     if i < 2:
         gl.bottom_labels = False
 
-    # Plot variables as scatter
-    sc = ax.scatter(lon, lat, c=df_combined[variables[i]], cmap=cmaps[i],
-                    s=30, transform=ccrs.PlateCarree())
+    if i == 0:  # Temperature plot
+        sc = ax.scatter(lon, lat, c=df_combined[variables[i]], cmap=cmaps[i],
+                        s=30, transform=ccrs.PlateCarree(), vmin=temp_range[0], vmax=temp_range[1])
+    elif i == 1:  # Salinity plot
+        sc = ax.scatter(lon, lat, c=df_combined[variables[i]], cmap=cmaps[i],
+                        s=30, transform=ccrs.PlateCarree(), vmin=salinity_range[0], vmax=salinity_range[1])
 
-    # Colormap
     cbar = plt.colorbar(sc, ax=ax, orientation='vertical', fraction=0.046, pad=0.04)
     cbar.set_label(titles[i])
 
@@ -67,16 +71,15 @@ for i, ax in enumerate(axs):
 
 plt.tight_layout()
 plt.show()
+
 '''
-
-
 
 '''------------------------------------------------------------------------------------------------------------------------------------'''
 
 
 # Calculate boutancy gardient (b_x)
 
-temp = df_combined['Temp_SBE45']
+temp = df_combined['Temp_SBE45'] # Rätt temp?
 salinity = df_combined['Salinity_SBE45']
 
 g = 9.81  
