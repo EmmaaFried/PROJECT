@@ -32,7 +32,7 @@ df_combined['depth_m'] = -depth  # z är negativ i gsw
 lon = df_combined['Longitude']
 lat = df_combined['Latitude']
 
-variables = ['Temp_SBE45', 'Salinity_SBE45']
+variables = ['Temp_in_SBE38', 'Salinity_SBE45'] # FEL TEMP TODO
 titles = ['Temperature (°C)', 'Salinity (psu)']
 cmaps = ['coolwarm', 'viridis']
 
@@ -40,6 +40,7 @@ extent = [lon.min() - 0.05, lon.max() + 0.05, lat.min() - 0.05, lat.max() + 0.05
 
 temp_range = [10, 12]  
 salinity_range = [22, 30]  
+
 '''
 fig, axs = plt.subplots(1, 2, figsize=(16, 12), subplot_kw={'projection': ccrs.Mercator()})
 axs = axs.flatten()
@@ -71,15 +72,15 @@ for i, ax in enumerate(axs):
 
 plt.tight_layout()
 plt.show()
-
 '''
+
 
 '''------------------------------------------------------------------------------------------------------------------------------------'''
 
 
 # Calculate boutancy gardient (b_x)
 
-temp = df_combined['Temp_SBE45'] # Rätt temp?
+temp = df_combined['Temp_in_SBE38'] # FEL TEMP! TODO 
 salinity = df_combined['Salinity_SBE45']
 
 g = 9.81  
@@ -91,7 +92,7 @@ idx_depth = np.argmin(np.abs(depth - depth_target))
 SA = gsw.SA_from_SP(df_combined['Salinity_SBE45'], p_dbar, df_combined['Longitude'], df_combined['Latitude'])
 
 # Omvandla temperatur till konservativ temperatur (CT)
-CT = gsw.CT_from_t(SA, df_combined['Temp_SBE45'], p_dbar)
+CT = gsw.CT_from_t(SA, df_combined['Temp_in_SBE38'], p_dbar)
 
 rho = gsw.rho(SA, CT, p_dbar)
 

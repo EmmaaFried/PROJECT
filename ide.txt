@@ -18,7 +18,7 @@ Vidarearbetare ideer:
     Calculate b_x and take the wind stress from the boat and calculate the bouyancy flux along day 1 and day 3 transect  (See sebs exercise)
 
     Part 2: 
-    Calculate the bouyancy flux along the fronr transect from day 2
+    Calculate the bouyancy flux along the front transect from day 2
 
     Part 3:
     Compare satielite and boat wind stress/wind data
