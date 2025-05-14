@@ -13,7 +13,7 @@ import pandas as pd
 
 df_combined = Buoyancy_Gradient.df_combined
 b_x = Buoyancy_Gradient.b_x
-b_x_smooth = Buoyancy_Gradient.b_x_smooth # Rolling mean
+#b_x_smooth = Buoyancy_Gradient.b_x_smooth # Rolling mean
 
 weather_data = Weather_data.df_may_6_may_8
 
@@ -35,31 +35,41 @@ f = gsw.f(lat)  # s^-1
 # Cite: https://journals.ametsoc.org/view/journals/phoc/53/12/JPO-D-23-0005.1.xml#bib51    --  for Ekman buoyancy flux
 
 
-
+'''
 rho0 = df_combined['density'] # sea water density
-
 cross_dot = tau_y * b_x - tau_x * b_x
-
 EBF = cross_dot.values / (rho0 * f)
-
 df_combined['EBF'] = EBF
-
+'''
 
 
 Cp = 4000    # J/kg/K
 alpha = 1e-4 # 1/K
-g = 9.8      # m/s^2
+g = 9.81      # m/s^2
 f_fast = 1.22e-4
 
-Q_ekman = (b_x * tau * Cp) / (f_fast * alpha * g)
+Q_ekman = (b_x.values * tau.values * Cp) / (f_fast * alpha * g)
+
+print(len(Q_ekman))
 
 # Vilken ska användas, EBF eller Q_ekman
+dist = Buoyancy_Gradient.dist
 
-#plt.plot(Q_ekman)
-#plt.show()
-
-# Plot:
+mask = dist > 1500
 '''
+# Plot only data after 1500 m 
+plt.figure(figsize=(10, 5))
+plt.plot(dist[mask]/1000, Q_ekman[mask])
+plt.axhline(0, color='gray', linestyle='--')
+plt.xlabel('Distance (km)')
+plt.ylabel('W/m2')
+plt.title('Q_ekman')
+plt.legend()
+plt.tight_layout()
+plt.show()
+'''
+# Plot:
+
 
 fig, ax = plt.subplots(1, 1, figsize=(10, 10), subplot_kw={'projection': ccrs.Mercator()})
 
@@ -85,4 +95,3 @@ cbar.set_label('W/m^2')
 ax.set_title('Ekman Buoyancy Flux ')
 
 plt.show()
-'''

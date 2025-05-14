@@ -7,7 +7,7 @@ df_p = pd.read_csv('Data/sk_position.csv')
 
 df_combined = pd.merge(df_p, df_w, on='ts', how='inner')
 
-# Calcuate wind stress TODO KOLLA IGENOM DENNA BERÄKNINGEN
+# Calcuate wind stress TODO KOLLA IGENOM DENNA BERÄKNINGEN!!!!!!!!
 
 def air_density(temp_C, pressure_hPa, humidity_percent):
 
