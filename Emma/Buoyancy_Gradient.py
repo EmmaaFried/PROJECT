@@ -32,7 +32,7 @@ df_combined['depth_m'] = -depth  # z är negativ i gsw
 lon = df_combined['Longitude']
 lat = df_combined['Latitude']
 
-variables = ['Temp_in_SBE38', 'Salinity_SBE45'] # FEL TEMP TODO
+variables = ['Temp_in_SBE38', 'Salinity_SBE45'] 
 titles = ['Temperature (°C)', 'Salinity (psu)']
 cmaps = ['coolwarm', 'viridis']
 
@@ -80,7 +80,7 @@ plt.show()
 
 # Calculate boutancy gardient (b_x)
 
-temp = df_combined['Temp_in_SBE38'] # FEL TEMP! TODO 
+temp = df_combined['Temp_in_SBE38'] 
 salinity = df_combined['Salinity_SBE45']
 
 g = 9.81  
