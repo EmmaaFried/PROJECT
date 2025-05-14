@@ -20,7 +20,7 @@ weather_data = Weather_data.df_may_6_may_8
 weather_data['ts'] = pd.to_datetime(weather_data['ts'])
 df_combined['datetime'] = pd.to_datetime(df_combined['datetime'])
 
-df_combined.loc[df_combined['datetime'] == '2025-05-08 09:30:01', 'datetime'] = '2025-05-08 09:30:00'
+df_combined.loc[df_combined['datetime'] == '2025-05-08 09:30:01', 'datetime'] = '2025-05-08 09:30:00' 
 
 df_tau_matched = weather_data[weather_data['ts'].isin(df_combined['datetime'])].copy()
 tau = df_tau_matched['tau']
@@ -44,7 +44,7 @@ df_combined['EBF'] = EBF
 
 
 # Plot:
-
+'''
 fig, ax = plt.subplots(1, 1, figsize=(10, 10), subplot_kw={'projection': ccrs.Mercator()})
 
 extent = [lon.min() - 0.05, lon.max() + 0.05, lat.min() - 0.05, lat.max() + 0.05]
@@ -70,3 +70,4 @@ cbar.set_label('???')
 ax.set_title('Ekman Buoyancy Flux')
 
 plt.show()
+'''
