@@ -10,6 +10,8 @@ import cartopy.feature as cfeature
 import gsw
 import os
 import pandas as pd
+import matplotlib.colors as mcolors
+
 
 df_combined = Buoyancy_Gradient.df_combined
 b_x = Buoyancy_Gradient.b_x
@@ -50,16 +52,45 @@ f_fast = 1.22e-4
 
 Q_ekman = (b_x.values * tau.values * Cp) / (f_fast * alpha * g)
 
-print(len(Q_ekman))
 
-# Vilken ska användas, EBF eller Q_ekman
+'''
+bx = 5e-7
+t = 0.5
+
+Q_ek_test = (bx*t*Cp)/(f_fast*alpha*g)
+
+print(Q_ek_test) # = 1671.1 for tau = 0.1 and = 8355.5 for tau = 0.47 (tau.max())
+
+'''
+
+
+# Vilken ska användas, EBF eller Q_ekman?
+
 dist = Buoyancy_Gradient.dist
 
-mask = dist > 1500
+##########################################
+### Remove values outside of first CTD ###
+
+lon_cutoff = 11.52267
+
+mask = lon <= lon_cutoff
+
+lat_filtered = lat[mask]
+lon_filtered = lon[mask]
+Q_ekman_filtered = Q_ekman[mask]
+dist_filtered = dist[mask]
+
+# Number of nan values
+
+num_nans = np.isnan(Q_ekman_filtered).sum()
+#print(len(Q_ekman_filtered))
+#print(f"Antal NaN i Q_ekman_filtered: {num_nans}")
+
+#########################################
+
 '''
-# Plot only data after 1500 m 
 plt.figure(figsize=(10, 5))
-plt.plot(dist[mask]/1000, Q_ekman[mask])
+plt.plot(dist_filtered/1000, Q_ekman_filtered)
 plt.axhline(0, color='gray', linestyle='--')
 plt.xlabel('Distance (km)')
 plt.ylabel('W/m2')
@@ -68,9 +99,20 @@ plt.legend()
 plt.tight_layout()
 plt.show()
 '''
+
+# Histogram
+'''
+plt.hist(Q_ekman_filtered, bins=1000)
+plt.xlabel('Q_ekman (W/m²)')
+plt.ylabel('Frekvens')
+plt.title('Fördelning av Ekmanflöde')
+plt.grid(True)
+plt.xlim(-10000,10000)
+plt.show()
+'''
 # Plot:
 
-
+'''
 fig, ax = plt.subplots(1, 1, figsize=(10, 10), subplot_kw={'projection': ccrs.Mercator()})
 
 extent = [lon.min() - 0.05, lon.max() + 0.05, lat.min() - 0.05, lat.max() + 0.05]
@@ -87,11 +129,60 @@ gl.bottom_labels = True
 
 #vmin, vmax = -1e-8, 1e-8 
 
-sc = ax.scatter(lon, lat, c=Q_ekman, cmap='coolwarm', vmin = -500, vmax = 500, s=30, transform=ccrs.PlateCarree())
+sc = ax.scatter(lon_filtered, lat_filtered, c=Q_ekman_filtered, vmin = -500, vmax = 500 ,cmap='coolwarm', s=30, transform=ccrs.PlateCarree())
 
 cbar = plt.colorbar(sc, ax=ax, orientation='vertical', fraction=0.046, pad=0.04)
 cbar.set_label('W/m^2')
 
 ax.set_title('Ekman Buoyancy Flux ')
 
+plt.show()
+'''
+
+
+
+
+# Skapa två maskar
+normal_mask = (Q_ekman_filtered >= -1600) & (Q_ekman_filtered <= 1600)
+extreme_mask = (Q_ekman_filtered < -1600) | (Q_ekman_filtered > 1600)
+
+# Dela upp data
+lon_normal = lon_filtered[normal_mask]
+lat_normal = lat_filtered[normal_mask]
+Q_normal = Q_ekman_filtered[normal_mask]
+
+lon_extreme = lon_filtered[extreme_mask]
+lat_extreme = lat_filtered[extreme_mask]
+Q_extreme = Q_ekman_filtered[extreme_mask]
+
+# Skapa plot
+fig, ax = plt.subplots(figsize=(10, 10), subplot_kw={'projection': ccrs.Mercator()})
+ax.set_extent([lon_filtered.min()-0.05, lon_filtered.max()+0.05,
+               lat_filtered.min()-0.05, lat_filtered.max()+0.05], crs=ccrs.PlateCarree())
+
+ax.add_feature(cfeature.COASTLINE)
+ax.add_feature(cfeature.LAND, facecolor='lightgray')
+ax.add_feature(cfeature.BORDERS, linestyle='--', linewidth=0.5)
+gl = ax.gridlines(draw_labels=True, linewidth=0.5, color='gray', linestyle='--')
+gl.top_labels = gl.right_labels = False
+gl.left_labels = True
+gl.bottom_labels = True
+
+# Normala värden
+sc1 = ax.scatter(lon_normal, lat_normal, c=Q_normal, cmap='Blues',
+                 vmin=-1000, vmax=1000, s=30, transform=ccrs.PlateCarree())
+
+# Extrema värden (använd t.ex. annan färgskala för att särskilja)
+sc2 = ax.scatter(lon_extreme, lat_extreme, c=Q_extreme, cmap='Reds',
+                 vmin=-10000, vmax=10000, s=30, transform=ccrs.PlateCarree())
+
+# Colorbar för normala värden
+cbar1 = plt.colorbar(sc1, ax=ax, orientation='vertical', fraction=0.046, pad=0.21)
+cbar1.set_label('Q_ekman (W/m²)')
+
+# Colorbar för extrema värden
+cbar2 = plt.colorbar(sc2, ax=ax, orientation='vertical', fraction=0.046, pad=0.02)
+cbar2.set_label('Q_ekman (W/m²)')
+
+ax.set_title('Ekman Buoyancy Flux')
 plt.show()
