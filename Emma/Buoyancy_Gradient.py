@@ -162,8 +162,8 @@ b_x = df_combined['b_x']
 
 # PLOT
 
-# Mask to exclude the first 10 meters
-mask = dist > 1500
+# Mask to exclude the first 1500 meters
+#mask = dist > 1500
 
 '''
 # Plot only data after 10 meters

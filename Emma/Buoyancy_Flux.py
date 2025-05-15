@@ -140,13 +140,12 @@ plt.show()
 '''
 
 
+# Two colorbars: 
 
-
-# Skapa två maskar
+'''
 normal_mask = (Q_ekman_filtered >= -1600) & (Q_ekman_filtered <= 1600)
 extreme_mask = (Q_ekman_filtered < -1600) | (Q_ekman_filtered > 1600)
 
-# Dela upp data
 lon_normal = lon_filtered[normal_mask]
 lat_normal = lat_filtered[normal_mask]
 Q_normal = Q_ekman_filtered[normal_mask]
@@ -155,7 +154,6 @@ lon_extreme = lon_filtered[extreme_mask]
 lat_extreme = lat_filtered[extreme_mask]
 Q_extreme = Q_ekman_filtered[extreme_mask]
 
-# Skapa plot
 fig, ax = plt.subplots(figsize=(10, 10), subplot_kw={'projection': ccrs.Mercator()})
 ax.set_extent([lon_filtered.min()-0.05, lon_filtered.max()+0.05,
                lat_filtered.min()-0.05, lat_filtered.max()+0.05], crs=ccrs.PlateCarree())
@@ -168,21 +166,18 @@ gl.top_labels = gl.right_labels = False
 gl.left_labels = True
 gl.bottom_labels = True
 
-# Normala värden
 sc1 = ax.scatter(lon_normal, lat_normal, c=Q_normal, cmap='Blues',
                  vmin=-1000, vmax=1000, s=30, transform=ccrs.PlateCarree())
 
-# Extrema värden (använd t.ex. annan färgskala för att särskilja)
 sc2 = ax.scatter(lon_extreme, lat_extreme, c=Q_extreme, cmap='Reds',
                  vmin=-10000, vmax=10000, s=30, transform=ccrs.PlateCarree())
 
-# Colorbar för normala värden
 cbar1 = plt.colorbar(sc1, ax=ax, orientation='vertical', fraction=0.046, pad=0.21)
 cbar1.set_label('Q_ekman (W/m²)')
 
-# Colorbar för extrema värden
 cbar2 = plt.colorbar(sc2, ax=ax, orientation='vertical', fraction=0.046, pad=0.02)
 cbar2.set_label('Q_ekman (W/m²)')
 
 ax.set_title('Ekman Buoyancy Flux')
 plt.show()
+'''
