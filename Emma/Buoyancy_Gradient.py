@@ -9,6 +9,8 @@ import cartopy.feature as cfeature
 import gsw
 import os
 import pandas as pd
+from pyproj import Geod
+from scipy.interpolate import interp1d
 
 
 df_may_8 = data.df_may_8 # Skagen to GBG
@@ -28,6 +30,9 @@ df_combined['depth_m'] = -depth  # z är negativ i gsw
 
 
 # Plot:
+
+bad_val = 1652.141541
+df_combined.loc[df_combined['Temp_in_SBE38'] == bad_val, 'Temp_in_SBE38'] = 11
 
 lon = df_combined['Longitude']
 lat = df_combined['Latitude']
@@ -79,7 +84,7 @@ plt.show()
 
 
 # Calculate boutancy gardient (b_x)
-
+'''
 temp = df_combined['Temp_in_SBE38'] 
 salinity = df_combined['Salinity_SBE45']
 
@@ -98,9 +103,6 @@ rho = gsw.rho(SA, CT, p_dbar)
 
 df_combined['density'] = rho
 
-
-# Calculate b_x:
-
 rho = df_combined['density'].values
 
 rho_0 = np.nanmean(rho)
@@ -117,11 +119,65 @@ x = np.insert(np.cumsum(dx), 0, 0)  # avstånd från start
 b_x = np.gradient(buoyancy, x)
 
 df_combined['b_x'] = b_x
+'''
 
-# Rolling mean:
-df_combined['b_x_smooth'] = pd.Series(b_x).rolling(window=5, center=True, min_periods=1).mean()
+# Omvandla praktisk salinitet (PSU) till absolut salinitet (SA)
+SA = gsw.SA_from_SP(df_combined['Salinity_SBE45'], p_dbar, df_combined['Longitude'], df_combined['Latitude'])
 
-b_x_smooth = df_combined['b_x_smooth']
+# Omvandla temperatur till konservativ temperatur (CT)
+CT = gsw.CT_from_t(SA, df_combined['Temp_in_SBE38'], p_dbar)
+
+df_combined['sigma0'] = gsw.sigma0(SA, CT) 
+
+geod = Geod(ellps="WGS84")
+lon  = df_combined["Longitude"].to_numpy()
+lat  = df_combined["Latitude"].to_numpy()
+_, _, step = geod.inv(lon[:-1], lat[:-1], lon[1:], lat[1:])
+dist = np.concatenate(([0.0], np.cumsum(step))) 
+
+rho0 = 1025.0
+g =  9.81
+
+# buoyancy 
+rho = df_combined["sigma0"].to_numpy() + 1000.0
+b   = g * (1 - rho / rho0)
+
+# regular 500 m grid
+d_reg = np.arange(0, dist[-1], 500.0)
+b_reg = interp1d(dist, b, bounds_error=False, fill_value=np.nan)(d_reg)
+
+# finite-difference gradient then rolling mean 
+dbdx_reg = np.gradient(b_reg, 500.0)                 # raw gradient
+dbdx_smooth = (pd.Series(dbdx_reg)
+               .rolling(5, center=True)              # 5-point window (≈2 km)
+               .mean()
+               .to_numpy())
+
+#  map back to original rows
+df_combined["b_x"] = np.interp(dist, d_reg, dbdx_smooth,
+                                left=np.nan, right=np.nan)
+
+
+b_x = df_combined['b_x']
+
+# PLOT
+
+# Mask to exclude the first 1500 meters
+#mask = dist > 1500
+
+'''
+# Plot only data after 10 meters
+plt.figure(figsize=(10, 5))
+plt.plot(dist[mask], df_combined['b_x'][mask], label='db/dx')
+plt.axhline(0, color='gray', linestyle='--')
+plt.xlabel('Distance (m)')
+plt.ylabel('Buoyancy Gradient (1/s²)')
+plt.title('Horizontal Buoyancy Gradient')
+plt.legend()
+plt.tight_layout()
+plt.show()
+
+'''
 
 # Plot b_x:
 '''

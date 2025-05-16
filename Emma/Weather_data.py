@@ -7,7 +7,7 @@ df_p = pd.read_csv('Data/sk_position.csv')
 
 df_combined = pd.merge(df_p, df_w, on='ts', how='inner')
 
-# Calcuate wind stress TODO KOLLA IGENOM DENNA BERÄKNINGEN
+# Calcuate wind stress TODO KOLLA IGENOM DENNA BERÄKNINGEN!!!!!!!!
 
 def air_density(temp_C, pressure_hPa, humidity_percent):
 
@@ -58,3 +58,5 @@ df_may_6_may_8 = pd.concat([df_may_8, df_may_6], ignore_index=True)
 df_may_6_may_8_tau = df_may_6_may_8['tau']
 df_may_6_may_8_tau_x = df_may_6_may_8['tau_x']
 df_may_6_may_8_tau_y = df_may_6_may_8['tau_y']
+
+df_may_7_tau = df_may_7['tau']
