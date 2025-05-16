@@ -194,9 +194,9 @@ weather_data = Weather_data.df_may_7
 
 weather_data['ts'] = pd.to_datetime(weather_data['ts'])
 
-df_tau_matched = weather_data[weather_data['ts'].isin(df_day_2_ferry_box['datetime'])].copy()
+df_weather_matched = weather_data[weather_data['ts'].isin(df_day_2_ferry_box['datetime'])].copy()
 
-tau = df_tau_matched['tau']
+tau = df_weather_matched['tau']
 
 tau_up = tau[:split_pos]
 tau_down = tau[split_pos:]
@@ -205,7 +205,7 @@ Q_ekman_up = (b_x_up.values * tau_up.values * Cp) / (f_fast * alpha * g)
 Q_ekman_down = (b_x_down.values * tau_down.values * Cp) / (f_fast * alpha * g)
 
 
-
+'''
 
 vmin, vmax = -1e-6, 1e-6
 
@@ -239,4 +239,4 @@ for ax, EBF_part, lat_part, lon_part, title in zip(
 cbar = plt.colorbar(sc, ax=axes, orientation='vertical', fraction=0.046, pad=0.14)
 cbar.set_label('W/m^2')
 
-plt.show()
+plt.show()'''
