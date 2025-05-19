@@ -137,11 +137,10 @@ wind_t  = pd.to_datetime(weather_data_6_maj['ts'])
 mask = wind_t.isin(curr_times)
 wind_da_matched = weather_data_6_maj.loc[mask].copy()
 
-print(wind_da_matched['winddir'], curr_da)
 
 dtheta = np.abs(((curr_da - wind_da_matched['winddir'] + 180) % 360) - 180) # Diff in wind and current direction
 
-
+'''
 fig = plt.figure(figsize=(8, 10))
 ax = plt.axes(projection=ccrs.Mercator())
 
@@ -168,6 +167,41 @@ ax.set_title("Current–wind direction difference at 8 m depth")
 
 cbar = plt.colorbar(sc, orientation="vertical", pad=0.04)
 cbar.set_label("Absolute angular difference (°)")
+
+plt.tight_layout()
+plt.show()
+'''
+
+
+fig = plt.figure(figsize=(8, 10))
+ax = plt.axes(projection=ccrs.Mercator())
+
+ax.set_extent([lon.min()-0.05, lon.max()+0.05,
+               lat.min()-0.05, lat.max()+0.05],
+              crs=ccrs.PlateCarree())
+
+ax.add_feature(cfeature.COASTLINE)
+ax.add_feature(cfeature.LAND, facecolor="lightgray")
+ax.add_feature(cfeature.BORDERS, linestyle="--", linewidth=0.5)
+
+gl = ax.gridlines(draw_labels=True, linewidth=0.5,
+                  color="gray", linestyle="--")
+gl.top_labels = gl.right_labels = False
+
+sc = ax.scatter(
+    lon, lat,
+    c=wind_da_matched['winddir'],
+    cmap="hsv",       
+    vmin=0, vmax=360,
+    s=35,
+    transform=ccrs.PlateCarree()
+)
+
+
+ax.set_title("Wind direction")
+
+cbar = plt.colorbar(sc, orientation="vertical", pad=0.04)
+cbar.set_label("Direction (° from North)")
 
 plt.tight_layout()
 plt.show()
