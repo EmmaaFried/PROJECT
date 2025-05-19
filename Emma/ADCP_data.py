@@ -7,8 +7,11 @@ import gsw_xarray as gsw
 from cmocean import cm as cmo  
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
+import time
 
+import Weather_data
 
+############## DAG 1 ##################
 file_path = r"C:/Users/emmfr/Fysisk oceanografi/OC4920/PROJECT/Data/adcp_data_6_maj.txt"
 
 # 1) read everything after the 12‑line file header
@@ -48,8 +51,8 @@ ds = ds/1000                             # mm/s → m/s
 ds = ds.assign_coords(lat=("time", lat), lon=("time", lon))
 
 
-
-
+# PLOT
+'''
 fig,axs = plt.subplots(2,1,figsize=(16,8),constrained_layout=True)
 
 variables = ["north_velocity","east_velocity"]
@@ -58,3 +61,115 @@ for ax,v in zip(axs,variables):
     ds[v].T.plot(ax=ax,cmap=cmo.balance,yincrease=False,vmax=0.25,vmin=-0.25,cbar_kwargs={'label': '{} (m/s)'.format(v)})
 
 plt.show()
+'''
+
+# Plot in map at 8 m depth
+
+u_8m = ds.east_velocity.sel(depth=8, drop=True)    # m s‑1
+v_8m = ds.north_velocity.sel(depth=8, drop=True)
+
+direction = (270 - np.degrees(np.arctan2(v_8m, u_8m))) % 360
+
+# 0 = North, 90 = East, 180 = South, 270 = West
+
+lat = ds.lat.values
+lon = ds.lon.values
+'''
+fig = plt.figure(figsize=(8, 10))
+ax = plt.axes(projection=ccrs.Mercator())
+
+ax.set_extent(
+    [lon.min() - 0.05, lon.max() + 0.05,
+     lat.min() - 0.05, lat.max() + 0.05],
+    crs=ccrs.PlateCarree()
+)
+
+ax.add_feature(cfeature.COASTLINE)
+ax.add_feature(cfeature.LAND, facecolor="lightgray")
+ax.add_feature(cfeature.BORDERS, linestyle="--", linewidth=0.5)
+
+gl = ax.gridlines(draw_labels=True, linewidth=0.5,
+                  color="gray", linestyle="--")
+gl.top_labels = gl.right_labels = False
+
+sc = ax.scatter(
+    lon, lat,
+    c=direction,
+    cmap="hsv",          # full 0‑360 hue circle
+    vmin=0, vmax=360,
+    s=35,
+    transform=ccrs.PlateCarree()
+)
+
+ax.set_title("Current direction at 8 m depth")
+
+cbar = plt.colorbar(sc, orientation="vertical", pad=0.04)
+cbar.set_label("Direction (° from North)")
+
+plt.tight_layout()
+plt.show()
+'''
+
+
+# Compare with wind direction
+
+weather_data_6_maj = Weather_data.df_may_6
+wind_dir_6_maj = weather_data_6_maj['winddir']
+
+# -------------------------------------------------
+
+curr_da = xr.DataArray(
+    (270 - np.degrees(np.arctan2(v_8m, u_8m))) % 360,
+    coords={"time": ds.time},  # 87 values
+    name="curr_dir",
+)
+
+# Round to nearest minute:
+times_pd = pd.to_datetime(curr_da['time'].values)
+times_rounded = times_pd.round('min')
+curr_da['time'] = xr.DataArray(times_rounded.values.astype('datetime64[ns]'), dims=curr_da['time'].dims)
+
+curr_da['time'] = pd.to_datetime(curr_da['time'].values).round('min')
+
+
+curr_times = pd.to_datetime(curr_da.time.values)     
+wind_t  = pd.to_datetime(weather_data_6_maj['ts'])     
+mask = wind_t.isin(curr_times)
+wind_da_matched = weather_data_6_maj.loc[mask].copy()
+
+print(wind_da_matched['winddir'], curr_da)
+
+dtheta = np.abs(((curr_da - wind_da_matched['winddir'] + 180) % 360) - 180) # Diff in wind and current direction
+
+
+fig = plt.figure(figsize=(8, 10))
+ax = plt.axes(projection=ccrs.Mercator())
+
+ax.set_extent([lon.min()-0.05, lon.max()+0.05,
+               lat.min()-0.05, lat.max()+0.05],
+              crs=ccrs.PlateCarree())
+
+ax.add_feature(cfeature.COASTLINE)
+ax.add_feature(cfeature.LAND, facecolor="lightgray")
+ax.add_feature(cfeature.BORDERS, linestyle="--", linewidth=0.5)
+
+gl = ax.gridlines(draw_labels=True, linewidth=0.5,
+                  color="gray", linestyle="--")
+gl.top_labels = gl.right_labels = False
+
+sc = ax.scatter(lon, lat,
+                c=dtheta,
+                cmap="coolwarm",     # blue → aligned, red → opposite
+                vmin=0, vmax=180,
+                s=35,
+                transform=ccrs.PlateCarree())
+
+ax.set_title("Current–wind direction difference at 8 m depth")
+
+cbar = plt.colorbar(sc, orientation="vertical", pad=0.04)
+cbar.set_label("Absolute angular difference (°)")
+
+plt.tight_layout()
+plt.show()
+
+############################################
