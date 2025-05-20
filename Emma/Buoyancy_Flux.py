@@ -141,7 +141,7 @@ plt.show()
 
 
 # Two colorbars: 
-
+# TODO: Put them closer and make it go higher for the reds, like 50 000 or something or maybe just the max and min value as vmax and v min?
 '''
 normal_mask = (Q_ekman_filtered >= -1600) & (Q_ekman_filtered <= 1600)
 extreme_mask = (Q_ekman_filtered < -1600) | (Q_ekman_filtered > 1600)
