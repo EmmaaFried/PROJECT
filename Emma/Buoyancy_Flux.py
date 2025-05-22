@@ -141,7 +141,6 @@ plt.show()
 
 
 # Two colorbars: 
-# TODO: Put them closer and make it go higher for the reds, like 50 000 or something or maybe just the max and min value as vmax and v min?
 '''
 normal_mask = (Q_ekman_filtered >= -1600) & (Q_ekman_filtered <= 1600)
 extreme_mask = (Q_ekman_filtered < -1600) | (Q_ekman_filtered > 1600)
@@ -155,8 +154,8 @@ lat_extreme = lat_filtered[extreme_mask]
 Q_extreme = Q_ekman_filtered[extreme_mask]
 
 fig, ax = plt.subplots(figsize=(10, 10), subplot_kw={'projection': ccrs.Mercator()})
-ax.set_extent([lon_filtered.min()-0.05, lon_filtered.max()+0.05,
-               lat_filtered.min()-0.05, lat_filtered.max()+0.05], crs=ccrs.PlateCarree())
+ax.set_extent([lon_filtered.min()-0.1, lon_filtered.max()+0.1,
+               lat_filtered.min()-0.1, lat_filtered.max()+0.1], crs=ccrs.PlateCarree())
 
 ax.add_feature(cfeature.COASTLINE)
 ax.add_feature(cfeature.LAND, facecolor='lightgray')
@@ -170,13 +169,13 @@ sc1 = ax.scatter(lon_normal, lat_normal, c=Q_normal, cmap='Blues',
                  vmin=-1000, vmax=1000, s=30, transform=ccrs.PlateCarree())
 
 sc2 = ax.scatter(lon_extreme, lat_extreme, c=Q_extreme, cmap='Reds',
-                 vmin=-10000, vmax=10000, s=30, transform=ccrs.PlateCarree())
+                 vmin=-20000, vmax=20000, s=30, transform=ccrs.PlateCarree())
 
-cbar1 = plt.colorbar(sc1, ax=ax, orientation='vertical', fraction=0.046, pad=0.21)
-cbar1.set_label('Q_ekman (W/m²)')
+cbar1 = plt.colorbar(sc1, ax=ax, orientation='vertical', fraction=0.046, pad=0.15)
+cbar1.set_label('Q (W/m²)')
 
 cbar2 = plt.colorbar(sc2, ax=ax, orientation='vertical', fraction=0.046, pad=0.02)
-cbar2.set_label('Q_ekman (W/m²)')
+cbar2.set_label('Q (W/m²)')
 
 ax.set_title('Ekman Buoyancy Flux')
 plt.show()

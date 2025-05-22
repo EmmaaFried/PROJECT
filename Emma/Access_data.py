@@ -12,7 +12,7 @@ import pandas as pd
 data_folder = 'Data'
 
 # List of all .txt files in the folder
-files = [f for f in os.listdir(data_folder) if f.endswith('.txt')]
+files = [f for f in os.listdir(data_folder) if f.endswith('1.txt')]
 
 # Function to process a single file
 def process_file(filepath):
