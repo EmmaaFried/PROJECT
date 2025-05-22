@@ -58,6 +58,10 @@ direction = (270 - np.degrees(np.arctan2(v_8m, u_8m))) % 360
 lat = ds.lat.values
 lon = ds.lon.values
 
+
+lat_wind = ds.lat.values
+lon_wind = ds.lon.values
+
 '''
 fig = plt.figure(figsize=(8, 10))
 ax = plt.axes(projection=ccrs.Mercator())
@@ -138,19 +142,26 @@ around_90_mask = (dtheta >= (90 - tolerance)) & (dtheta <= (90 + tolerance))
 
 
 ########### TEST #############
+
+# TODO: Add magnitude to current and wind to see how relevant the arrows are.
+# If wind or current speed is close to zero, neglect, make it a green dot (typ?) in the final anglel diff plot. 
+# lim = 0.5 m/s eller 1 m/s
+# Make a plot with the magnitude as arrows for the full transikt!
+
+'''
 # --> it seems like the wind is coming from south? valid?
 # --> while currents from north?
 # OPPOSITE WAYS
-angles_deg = weather_data_8_maj['winddir'].values
-#angles_deg = curr_da.values
+#angles_deg = weather_data_8_maj['winddir'].values
+angles_deg = curr_da.values
 angles_rad = np.deg2rad(angles_deg)
-u = np.sin(angles_rad)   
-v = np.cos(angles_rad)
+u = np.cos(angles_rad)   
+v = np.sin(angles_rad)
 
 #lon = ds['lon']
 #lat = ds['lat']
-lon = weather_data_8_maj['longitude']
-lat = weather_data_8_maj['latitude']
+#lon = weather_data_8_maj['longitude']
+#lat = weather_data_8_maj['latitude']
 
 fig = plt.figure(figsize=(8, 10))
 ax = plt.axes(projection=ccrs.Mercator())
@@ -181,7 +192,7 @@ cbar = plt.colorbar(q, orientation="vertical", pad=0.04)
 cbar.set_label("Direction (° from North)")
 
 plt.tight_layout()
-plt.show()
+plt.show()'''
 ########## END OF TEST ############
 
 

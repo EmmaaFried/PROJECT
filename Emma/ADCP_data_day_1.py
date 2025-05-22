@@ -77,6 +77,10 @@ direction = (270 - np.degrees(np.arctan2(v_8m, u_8m))) % 360
 
 lat = ds.lat.values
 lon = ds.lon.values
+
+lat_wind = ds.lat.values
+lon_wind = ds.lon.values
+
 '''
 fig = plt.figure(figsize=(8, 10))
 ax = plt.axes(projection=ccrs.Mercator())
@@ -244,8 +248,8 @@ plt.show()
 angles_deg = subset_wind_df['winddir'].values
 #angles_deg = weather_data_6_maj['winddir'].values
 angles_rad = np.deg2rad(angles_deg)
-u = np.sin(angles_rad)   
-v = np.cos(angles_rad)
+u = np.cos(angles_rad)   
+v = np.sin(angles_rad)
 
 lon = subset_wind_df['longitude']
 lat = subset_wind_df['latitude']
@@ -283,8 +287,8 @@ cbar.set_label("Direction (° from North)")
 
 plt.tight_layout()
 plt.show()
-
 '''
+
 '''
 angles_deg = curr_da.values
 angles_rad = np.deg2rad(angles_deg)

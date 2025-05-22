@@ -50,8 +50,16 @@ alpha = 1e-4 # 1/K
 g = 9.81      # m/s^2
 f_fast = 1.22e-4
 
+#alpha = gsw.alpha(Buoyancy_Gradient.SA, Buoyancy_Gradient.CT, Buoyancy_Gradient.p_dbar)
+
 Q_ekman = (b_x.values * tau.values * Cp) / (f_fast * alpha * g)
 
+print(np.nanmedian(abs(Buoyancy_Gradient.b)))
+
+plt.plot(Buoyancy_Gradient.dist, Buoyancy_Gradient.b)
+plt.show()
+#Q_ekman_abs = abs(Q_ekman)
+#print(np.nanmax(Q_ekman_abs))
 
 '''
 bx = 5e-7
@@ -138,7 +146,6 @@ ax.set_title('Ekman Buoyancy Flux ')
 
 plt.show()
 '''
-
 
 # Two colorbars: 
 '''
