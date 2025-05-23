@@ -158,6 +158,8 @@ dtheta = np.abs(((curr_da - subset_wind_df['winddir'] + 180) % 360) - 180) # Dif
 tolerance = 10
 around_90_mask = (dtheta >= (90 - tolerance)) & (dtheta <= (90 + tolerance))
 
+low_wind_mask = subset_wind_df['windspeed'] < 1
+
 
 ### PLOT DIFFERENCE ###
 '''

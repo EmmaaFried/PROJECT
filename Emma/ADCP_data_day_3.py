@@ -133,12 +133,15 @@ end_time = pd.Timestamp('2025-05-08 15:07:00')
 time_index = pd.date_range(start=start_time, end=end_time, freq='5T')
 subset_wind_df = df.loc[df.index.isin(time_index)].reset_index()
 
-
 dtheta = np.abs(((curr_da - subset_wind_df['winddir'] + 180) % 360) - 180) # Diff in wind and current direction
 
 # 90 deg difference: 
 tolerance = 10
 around_90_mask = (dtheta >= (90 - tolerance)) & (dtheta <= (90 + tolerance))
+
+low_wind_mask = subset_wind_df['windspeed'] < 1
+
+
 
 
 ########### TEST #############
@@ -148,18 +151,20 @@ around_90_mask = (dtheta >= (90 - tolerance)) & (dtheta <= (90 + tolerance))
 # lim = 0.5 m/s eller 1 m/s
 # Make a plot with the magnitude as arrows for the full transikt!
 
+
 '''
-# --> it seems like the wind is coming from south? valid?
-# --> while currents from north?
-# OPPOSITE WAYS
+
+wind_speed = subset_wind_df['windspeed']
+
 #angles_deg = weather_data_8_maj['winddir'].values
+#angles_deg = subset_wind_df['winddir'].values
 angles_deg = curr_da.values
 angles_rad = np.deg2rad(angles_deg)
 u = np.cos(angles_rad)   
 v = np.sin(angles_rad)
 
-#lon = ds['lon']
-#lat = ds['lat']
+lon = ds['lon']
+lat = ds['lat']
 #lon = weather_data_8_maj['longitude']
 #lat = weather_data_8_maj['latitude']
 
@@ -192,7 +197,10 @@ cbar = plt.colorbar(q, orientation="vertical", pad=0.04)
 cbar.set_label("Direction (° from North)")
 
 plt.tight_layout()
-plt.show()'''
+plt.show()
+'''
+
+
 ########## END OF TEST ############
 
 
