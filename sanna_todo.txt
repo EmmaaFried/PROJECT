@@ -1,0 +1,6 @@
+Check magnitudes of Q_EBF
+Alongfront Tau from ADCP
+
+CTD Q_EBF
+
+Skriva metod helt
