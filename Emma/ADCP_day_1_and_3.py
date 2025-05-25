@@ -48,7 +48,6 @@ wind_8 = ADCP_data_day_3.subset_wind_df
 
 ds_combined = xr.concat([ds_6, ds_8], dim='time')  
 
-# Remove non-relevant data: 
 
 ### Vertical plots along transict
 '''
