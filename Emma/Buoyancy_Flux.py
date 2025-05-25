@@ -1,5 +1,6 @@
 import Buoyancy_Gradient 
 import Weather_data
+import Susanna
 
 import xarray as xr
 import numpy as np
@@ -52,11 +53,13 @@ f_fast = 1.22e-4
 
 #alpha = gsw.alpha(Buoyancy_Gradient.SA, Buoyancy_Gradient.CT, Buoyancy_Gradient.p_dbar)
 
-Q_ekman = (b_x.values * tau.values * Cp) / (f_fast * alpha * g)
+b_x_susanna = Susanna.b_x
 
-print(np.nanmedian(abs(Buoyancy_Gradient.b)))
+Q_ekman = (b_x_susanna * tau.values * Cp) / (f_fast * alpha * g)
 
-plt.plot(Buoyancy_Gradient.dist, Buoyancy_Gradient.b)
+print(np.nanmin(abs(Q_ekman)))
+
+plt.plot(Susanna.b)
 plt.show()
 #Q_ekman_abs = abs(Q_ekman)
 #print(np.nanmax(Q_ekman_abs))
