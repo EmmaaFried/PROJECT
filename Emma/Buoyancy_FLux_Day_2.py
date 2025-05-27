@@ -54,17 +54,23 @@ df_day_2_ferry_box['density'] = rho
 lon = df_day_2_ferry_box['Longitude']
 lat = df_day_2_ferry_box['Latitude']
 
-variables = ['Temp_in_SBE38', 'Salinity_SBE45'] 
-titles = ['Temperature (°C)', 'Salinity (psu)']
-cmaps = ['coolwarm', 'viridis']
+df_day_2_ferry_box['rho'] = rho
+df_day_2_ferry_box['temp'] = CT     
+df_day_2_ferry_box['salt'] = SA
+
+variables = ['temp', 'salt', 'rho'] 
+titles = ['Temperature (°C)', 'Salinity (g/kg)', 'Density (kg/m³)']
+cmaps = ['coolwarm', 'viridis', 'ocean_r'] 
+
 
 extent = [lon.min() - 0.05, lon.max() + 0.05, lat.min() - 0.05, lat.max() + 0.05]
 
 temp_range = [9.5, 11.5]  
 salinity_range = [27, 31]  
+density_range = [1020,1027] 
 
 '''
-fig, axs = plt.subplots(1, 2, figsize=(16, 12), subplot_kw={'projection': ccrs.Mercator()})
+fig, axs = plt.subplots(1, 3, figsize=(16, 12), subplot_kw={'projection': ccrs.Mercator()})
 axs = axs.flatten()
 
 for i, ax in enumerate(axs):
@@ -76,9 +82,9 @@ for i, ax in enumerate(axs):
     gl = ax.gridlines(draw_labels=True, linewidth=0.5, color='gray', linestyle='--')
     gl.top_labels = gl.right_labels = False
     if i % 2 != 0:
-        gl.left_labels = False
+        gl.left_labels = True
     if i < 2:
-        gl.bottom_labels = False
+        gl.bottom_labels = True
 
     if i == 0:  # Temperature plot
         sc = ax.scatter(lon, lat, c=df_day_2_ferry_box[variables[i]], cmap=cmaps[i],
@@ -86,11 +92,17 @@ for i, ax in enumerate(axs):
     elif i == 1:  # Salinity plot
         sc = ax.scatter(lon, lat, c=df_day_2_ferry_box[variables[i]], cmap=cmaps[i],
                         s=30, transform=ccrs.PlateCarree(), vmin=salinity_range[0], vmax=salinity_range[1])
+    elif i == 2:  # Density plot
+        sc = ax.scatter(lon, lat, c=df_day_2_ferry_box[variables[i]], cmap=cmaps[i],
+                        s=30, transform=ccrs.PlateCarree(), vmin=density_range[0], vmax=density_range[1])
 
-    cbar = plt.colorbar(sc, ax=ax, orientation='vertical', fraction=0.046, pad=0.14)
-    cbar.set_label(titles[i])
+    # Adjust colorbar size and font
+    cbar = plt.colorbar(sc, ax=ax, orientation='vertical', fraction=0.08, pad=0.12)
+    cbar.set_label(titles[i], fontsize=14)
+    cbar.ax.tick_params(labelsize=14)
 
-    ax.set_title(titles[i])
+    ax.set_title(titles[i], fontsize=14)
+    ax.tick_params(labelsize=14)
 
 plt.show()
 

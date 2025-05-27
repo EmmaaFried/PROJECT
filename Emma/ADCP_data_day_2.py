@@ -8,6 +8,7 @@ from cmocean import cm as cmo
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 import time
+from pyproj import Geod
 
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
@@ -66,7 +67,31 @@ lon_down = lon[split_pos:]
 ds_up = ds.isel(time=slice(0, split_pos))
 ds_down = ds.isel(time=slice(split_pos, None))
 
+
+
+
+
 # Calculate speed and direction:
+
+lon_up = ds_up['lon'].values
+lat_up = ds_up['lat'].values
+
+geod = Geod(ellps="WGS84")
+
+_, _, distances_up = geod.inv(lon_up[:-1], lat_up[:-1], lon_up[1:], lat_up[1:])
+
+dist_m_up = np.concatenate(([0], np.cumsum(distances_up)))
+
+
+lon_down = ds_down['lon'].values
+lat_down = ds_down['lat'].values
+
+geod = Geod(ellps="WGS84")
+
+_, _, distances_down = geod.inv(lon_down[:-1], lat_down[:-1], lon_down[1:], lat_down[1:])
+
+dist_m_down = np.concatenate(([0], np.cumsum(distances_down)))
+
 
 ds_up['speed'] = np.sqrt(ds_up['east_velocity']**2 + ds_up['north_velocity']**2)
 ds_up['direction'] = (np.arctan2(ds_up['east_velocity'], ds_up['north_velocity']) * 180 / np.pi) % 360
@@ -80,8 +105,33 @@ titles = ["Current Speed", "Current Direction"]
 cmaps = ['viridis', 'twilight']
 units = ["(m/s)", "(°)"]
 
+
 # Plot:
 
+'''
+fig, axs = plt.subplots(2, 2, figsize=(20, 10), constrained_layout=True)
+
+for i, (ds, dist_m, label) in enumerate(zip([ds_up, ds_down], [dist_m_up, dist_m_down], ['Up', 'Down'])):
+    for j, (var, title, cmap, unit) in enumerate(zip(variables, titles, cmaps, units)):
+        data = ds[var].values.T  # Shape: (depth, profile)
+        depth = ds.depth.values
+        X, Y = np.meshgrid(dist_m/1000, depth)
+
+        pcm = axs[i, j].pcolormesh(X, Y, data, cmap=cmap, shading='auto')
+        cbar = fig.colorbar(pcm, ax=axs[i, j])
+        cbar.set_label(f"{title} {unit}", fontsize=14)
+        
+        axs[i, j].invert_yaxis()
+        axs[i, j].set_xlabel("Distance (km)", fontsize=14)
+        axs[i, j].set_ylabel("Depth (m)", fontsize=14)
+        axs[i, j].set_title(f"{label} - {title}", fontsize=14)
+        axs[i, j].tick_params(labelsize=14)
+
+plt.show()
+'''
+
+
+'''
 fig, axs = plt.subplots(2, 2, figsize=(20, 10), constrained_layout=True)
 
 for j, (var, title, cmap, unit) in enumerate(zip(variables, titles, cmaps, units)):
@@ -103,4 +153,4 @@ for j, (var, title, cmap, unit) in enumerate(zip(variables, titles, cmaps, units
     )
     axs[1, j].set_title(f"Down - {title}")
 
-plt.show()
+plt.show()'''
