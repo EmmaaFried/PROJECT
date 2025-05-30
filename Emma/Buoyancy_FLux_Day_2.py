@@ -59,7 +59,7 @@ df_day_2_ferry_box['temp'] = CT
 df_day_2_ferry_box['salt'] = SA
 
 variables = ['temp', 'salt', 'rho'] 
-titles = ['Temperature (°C)', 'Salinity (g/kg)', 'Density (kg/m³)']
+titles = ['Temperature (°C)', r'Salinity (g kg$^{-1}$)', r'Density (kg m$^{-3}$)']
 cmaps = ['coolwarm', 'viridis', 'ocean_r'] 
 
 
@@ -69,7 +69,7 @@ temp_range = [9.5, 11.5]
 salinity_range = [27, 31]  
 density_range = [1020,1027] 
 
-'''
+
 fig, axs = plt.subplots(1, 3, figsize=(16, 12), subplot_kw={'projection': ccrs.Mercator()})
 axs = axs.flatten()
 
@@ -106,7 +106,6 @@ for i, ax in enumerate(axs):
 
 plt.show()
 
-'''
 
 
 # Calculate b_x:

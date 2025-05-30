@@ -82,7 +82,7 @@ df_combined['temp'] = CT
 df_combined['salt'] = SA
 
 variables = ['temp', 'salt', 'rho'] 
-titles = ['Temperature (°C)', 'Salinity (g/kg)', 'Density (kg/m³)']
+titles = ['Temperature (°C)', r'Salinity (g kg$^{-1}$)', r'Density (kg m$^{-3}$)']
 cmaps = ['coolwarm', 'viridis', 'ocean_r'] 
 
 extent = [lon.min() - 0.05, lon.max() + 0.05, lat.min() - 0.05, lat.max() + 0.05]
