@@ -11,6 +11,7 @@ from cmocean import cm as cmo
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 import matplotlib.dates as mdates
+from pyproj import Geod
 
 
 dtheta_6e = ADCP_data_day_1.dtheta
@@ -86,7 +87,29 @@ plt.show()
 ### Speed and direction
 
 
-'''OLD
+
+
+lon_6 = ds_6['lon'].values
+lat_6 = ds_6['lat'].values
+
+geod = Geod(ellps="WGS84")
+
+_, _, distances_6 = geod.inv(lon_6[:-1], lat_6[:-1], lon_6[1:], lat_6[1:])
+
+dist_m_6 = np.concatenate(([0], np.cumsum(distances_6)))
+
+
+lon_8 = ds_8['lon'].values
+lat_8 = ds_8['lat'].values
+
+geod = Geod(ellps="WGS84")
+
+_, _, distances_8 = geod.inv(lon_8[:-1], lat_8[:-1], lon_8[1:], lat_8[1:])
+
+dist_m_8 = np.concatenate(([0], np.cumsum(distances_8)))
+
+
+
 ds_6 = ADCP_data_day_1.ds
 ds_6['speed'] = np.sqrt(ds_6['east_velocity']**2 + ds_6['north_velocity']**2)
 ds_6['direction'] = (np.arctan2(ds_6['east_velocity'], ds_6['north_velocity']) * 180 / np.pi) % 360
@@ -104,65 +127,30 @@ cmaps = ['viridis', 'twilight']
 units = ["(m/s)", "(°)"]
 
 
-# 8 meter depth data: 
+'''
+fig, axs = plt.subplots(2, 2, figsize=(20, 10), constrained_layout=True)
 
-dir_6_8m = ds_6['direction'].sel(depth=8, method='nearest', drop=True)
-dir_8_8m = ds_8['direction'].sel(depth=8, method='nearest', drop=True)
+for i, (ds, dist_m, label) in enumerate(zip([ds_6, ds_8], [dist_m_6, dist_m_8], ['May 6', 'May 8'])):
+    for j, (var, title, cmap, unit) in enumerate(zip(variables, titles, cmaps, units)):
+        data = ds[var].values.T  # Shape: (depth, profile)
+        depth = ds.depth.values
+        X, Y = np.meshgrid(dist_m/1000, depth)
 
-def circular_diff(a, b):
-    return np.abs(((a - b + 180) % 360) - 180)
+        pcm = axs[i, j].pcolormesh(X, Y, data, cmap=cmap, shading='auto')
+        cbar = fig.colorbar(pcm, ax=axs[i, j])
+        cbar.set_label(f"{title} {unit}", fontsize=14)
+        
+        axs[i, j].invert_yaxis()
+        axs[i, j].set_xlabel("Distance (km)", fontsize=14)
+        axs[i, j].set_ylabel("Depth (m)", fontsize=14)
+        axs[i, j].set_title(f"{label} - {title}", fontsize=14)
+        axs[i, j].tick_params(labelsize=14)
 
-diff_6 = circular_diff(dir_6_8m, wind_6['winddir'].values)
-diff_8 = circular_diff(dir_8_8m, wind_8['winddir'].values)
+plt.show()
+'''
 
-fig, axs = plt.subplots(2, 3, figsize=(20, 10), constrained_layout=True)
 
-# Plot for ds_6 (row 0)
-for j, (var, title, cmap, unit) in enumerate(zip(variables, titles, cmaps, units)):
-    ds_6[var].T.plot(
-        ax=axs[0, j],
-        cmap=cmap,
-        yincrease=False,
-        cbar_kwargs={'label': f'{title} {unit}'}
-    )
-    axs[0, j].set_title(f"May 6 - {title}")
 
-# Wind direction for ds_6 in 3rd column
-axs[0, 2].plot(wind_6['ts'], wind_6['winddir'], label='Wind Direction', color='darkorange', lw=2)
-axs[0, 2].plot(dir_6_8m['time'], dir_6_8m, label='Current Direction (8 m)', color='steelblue', lw=2)
-axs[0, 2].set_title("May 6 - Wind & Current Direction")
-axs[0, 2].set_ylabel("Direction (°)")
-axs[0, 2].set_xlabel("Time")
-axs[0, 2].set_ylim(0, 360)
-axs[0, 2].xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
-axs[0, 2].grid(True)
-axs[0, 2].legend()
-
-# Plot for ds_8 (row 1)
-for j, (var, title, cmap, unit) in enumerate(zip(variables, titles, cmaps, units)):
-    ds_8[var].T.plot(
-        ax=axs[1, j],
-        cmap=cmap,
-        yincrease=False,
-        cbar_kwargs={'label': f'{title} {unit}'}
-    )
-    axs[1, j].set_title(f"May 8 - {title}")
-
-# Wind direction for ds_8 in 3rd column
-axs[1, 2].plot(wind_8['ts'], wind_8['winddir'], label='Wind Direction', color='darkorange', lw=2)
-axs[1, 2].plot(dir_8_8m['time'], dir_8_8m, label='Current Direction (8 m)', color='steelblue', lw=2)
-axs[1, 2].set_title("May 8 - Wind & Current Direction")
-axs[1, 2].set_ylabel("Direction (°)")
-axs[1, 2].set_xlabel("Time")
-axs[1, 2].set_ylim(0, 360)
-axs[1, 2].xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
-axs[1, 2].grid(True)
-axs[1, 2].legend()
-
-plt.setp(axs[0, 2].xaxis.get_majorticklabels(), rotation=45, ha='right')
-plt.setp(axs[1, 2].xaxis.get_majorticklabels(), rotation=45, ha='right')
-
-plt.show()'''
 
 
 
